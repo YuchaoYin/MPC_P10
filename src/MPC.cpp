@@ -177,8 +177,8 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
 
   // Set limits for psi
   for (i = delta_start; i < a_start; i++) {
-      vars_lowerbound[i] = - 25 * M_PI / 180;
-      vars_upperbound[i] = 25 * M_PI / 180;
+      vars_lowerbound[i] = - 30 * M_PI / 180;
+      vars_upperbound[i] = 30 * M_PI / 180;
   }
 
   // Set limits for a

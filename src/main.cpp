@@ -139,7 +139,7 @@ int main() {
           double steer_value;
           double throttle_value;
 
-          steer_value = result[0] / (deg2rad(25) * Lf);
+          steer_value = result[0];
           throttle_value = result[1];
 
           json msgJson;
