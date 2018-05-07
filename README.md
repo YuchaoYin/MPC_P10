@@ -55,11 +55,35 @@ In the code, delta_gap_w is set to 100 to guarantee a comfortable transition on 
 
 ### 4. Constraints
 The actuator constraints is as follows:
-* steering: [-25 degree, 25 degree]
+* steering: [-30 degree, 30 degree]
 * acceleration: [-1, 1] -1 for full brake and 1 for full accleration
 
----
+### 5. Timestep Length and Elapsed Duration (N & dt)
+Prediction Horizon is defined as T = N * dt.
 
+Timestep Length N: The bigger N means the model predicts further but also would make the simulation run slower because the solver would have to optimize more parameters.
+
+Elapsed Duration dt: dt is also one important paramter. It controls the frequecy of the actuator. Large dt will cause problem when the vehicle needs fast reaction to the error, for example in curve.
+
+
+By tuning with different values and checking the performance in the simulator, the parameters finally set to N=10 and dt=0.1 in the code.
+
+### 6. Model Predictive Control with Latency
+The system has 100ms latency, which means we should predict the state 0.1s ahead in advance.
+This is implemented in main.cpp as follows:
+```
+          const double Lf = 2.67;
+          // 100ms latency
+          const double dt = 0.1;
+
+          // predict 0.1s ahead, psi = 0
+          double x_pred = 0.0 + v * dt;
+          double y_pred = 0.0;
+          double psi_pred = 0.0 + (v/Lf) * (-delta) * dt;
+          double v_pred = v + a * dt;
+          double cte_pred = cte + v * sin(epsi) * dt;
+          double epsi_pred = epsi + (v/Lf) * (-delta) * dt;
+```
 ---
 
 ## Dependencies
