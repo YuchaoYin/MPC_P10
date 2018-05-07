@@ -2,6 +2,65 @@
 Self-Driving Car Engineer Nanodegree Program
 
 ---
+## MPC Model
+### 1. State and Actuator
+The state of the vehicle: [x,y,ψ,v,cte,epsi].
+
+x, y: the position of the vehicle
+
+ψ   : orientation
+
+v   : velocity
+
+cte : cross track error
+
+epsi: orientation error 
+
+L_f is a physical characteristic of the vehicle, and [δ,a] are the actuators, or control inputs, to our system.
+
+### 2. Update Equations
+The following update equations are implemented in MPC model:
+```
+        x_[t] = x[t-1] + v[t-1] * cos(psi[t-1]) * dt
+        y_[t] = y[t-1] + v[t-1] * sin(psi[t-1]) * dt
+        psi_[t] = psi[t-1] + v[t-1] / Lf * delta[t-1] * dt
+        v_[t] = v[t-1] + a[t-1] * dt
+        cte[t] = f(x[t-1]) - y[t-1] + v[t-1] * sin(epsi[t-1]) * dt
+        epsi[t] = psi[t] - psides[t-1] + v[t-1] * delta[t-1] / Lf * dt
+```
+
+### 3. Cost Function
+The cost function is defined as the summation of each term based on the reference value. In the code, the reference velocity is set to 30.
+```
+   for (size_t t = 0; t < N; t++) {
+        fg[0] += cte_w * CppAD::pow(vars[cte_start + t] - cte_ref, 2);
+        fg[0] += epsi_w * CppAD::pow(vars[epsi_start + t] - epsi_ref, 2);
+        fg[0] += v_w * CppAD::pow(vars[v_start + t] - v_ref, 2);
+    }
+
+    // Minimize the use of actuators.
+    for (size_t t = 0; t < N - 1; t++) {
+        fg[0] += delta_w * CppAD::pow(vars[delta_start + t], 2);
+        fg[0] += a_w * CppAD::pow(vars[a_start + t], 2);
+    }
+
+    // Minimize the value gap between sequential actuations.
+    for (size_t t = 0; t < N - 2; t++) {
+        fg[0] += delta_gap_w * CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
+        fg[0] += a_gap_w * CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
+    }
+```
+In order to make the performance more smooth, we can multiply the cost by some values > 1. 
+In the code, delta_gap_w is set to 100 to guarantee a comfortable transition on steering.
+
+### 4. Constraints
+The actuator constraints is as follows:
+* steering: [-25 degree, 25 degree]
+* acceleration: [-1, 1] -1 for full brake and 1 for full accleration
+
+---
+
+---
 
 ## Dependencies
 
